@@ -27,12 +27,14 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-glx
+        sudo apt-get install -y libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev
     
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel
         pip install torch==2.0.1+cpu torchvision==0.15.2+cpu torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cpu
+        pip install opencv-python-headless
+        pip install pytest
         pip install -r requirements.txt --no-cache-dir
     
     - name: Run tests
