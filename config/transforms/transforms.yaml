@@ -1,0 +1,95 @@
+# MONAI transforms configuration for medical image preprocessing and augmentation
+
+# Training transforms (with augmentation)
+train_transforms:
+  - _target_: monai.transforms.LoadImaged
+    keys: ["image", "label"]
+    image_only: false
+  
+  - _target_: monai.transforms.EnsureChannelFirstd
+    keys: ["image", "label"]
+  
+  - _target_: monai.transforms.Resized
+    keys: ["image", "label"]
+    spatial_size: [320, 320]
+    mode: ["bilinear", "nearest"]
+  
+  - _target_: monai.transforms.ScaleIntensityRanged
+    keys: ["image"]
+    a_min: 0
+    a_max: 255
+    b_min: 0.0
+    b_max: 1.0
+    clip: true
+  
+  - _target_: monai.transforms.ScaleIntensityRanged
+    keys: ["label"]
+    a_min: 0
+    a_max: 255
+    b_min: 0.0
+    b_max: 1.0
+    clip: true
+  
+  # Data augmentation
+  - _target_: monai.transforms.RandRotated
+    keys: ["image", "label"]
+    range_x: 0.2
+    prob: 0.3
+    mode: ["bilinear", "nearest"]
+    padding_mode: "reflection"
+  
+  - _target_: monai.transforms.RandFlipd
+    keys: ["image", "label"]
+    prob: 0.5
+    spatial_axis: 0
+  
+  - _target_: monai.transforms.RandFlipd
+    keys: ["image", "label"]
+    prob: 0.5
+    spatial_axis: 1
+  
+  - _target_: monai.transforms.RandScaleIntensityd
+    keys: ["image"]
+    factors: 0.1
+    prob: 0.3
+  
+  - _target_: monai.transforms.RandAdjustContrastd
+    keys: ["image"]
+    prob: 0.3
+    gamma: [0.8, 1.2]
+  
+  - _target_: monai.transforms.EnsureTyped
+    keys: ["image", "label"]
+
+# Validation/Test transforms (no augmentation)
+val_transforms:
+  - _target_: monai.transforms.LoadImaged
+    keys: ["image", "label"]
+    image_only: false
+  
+  - _target_: monai.transforms.EnsureChannelFirstd
+    keys: ["image", "label"]
+  
+  - _target_: monai.transforms.Resized
+    keys: ["image", "label"]
+    spatial_size: [320, 320]
+    mode: ["bilinear", "nearest"]
+  
+  - _target_: monai.transforms.ScaleIntensityRanged
+    keys: ["image"]
+    a_min: 0
+    a_max: 255
+    b_min: 0.0
+    b_max: 1.0
+    clip: true
+  
+  - _target_: monai.transforms.ScaleIntensityRanged
+    keys: ["label"]
+    a_min: 0
+    a_max: 255
+    b_min: 0.0
+    b_max: 1.0
+    clip: true
+  
+  - _target_: monai.transforms.EnsureTyped
+    keys: ["image", "label"]

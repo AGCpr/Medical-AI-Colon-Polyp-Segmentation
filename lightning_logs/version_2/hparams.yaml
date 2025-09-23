@@ -1,0 +1,33 @@
+model_cfg:
+  _target_: model.SegmentationModel
+  backbone: efficientnet-b4
+  in_channels: 3
+  out_channels: 1
+  pre_trained: true
+  decoder_channels:
+  - 256
+  - 128
+  - 64
+  - 32
+  - 16
+  spatial_dimensions: 2
+  loss:
+    _target_: monai.losses.DiceLoss
+    sigmoid: true
+  metrics:
+    dice:
+      _target_: monai.metrics.DiceMetric
+      include_background: true
+      reduction: mean
+      get_not_nans: false
+optimizer_cfg:
+  _target_: torch.optim.SGD
+  lr: 0.007398
+  momentum: 0.9
+  weight_decay: 0.0001
+scheduler_cfg:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  mode: max
+  factor: 0.5
+  patience: 5
+  verbose: true

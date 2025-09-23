@@ -1,0 +1,49 @@
+# Training configuration
+
+# Optimizer settings
+optimizer:
+  _target_: torch.optim.SGD
+  lr: 0.007398
+  momentum: 0.9
+  weight_decay: 0.0001
+
+# Learning rate scheduler
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  mode: "max"
+  factor: 0.5
+  patience: 5
+  verbose: true
+  threshold: 0.001
+  min_lr: 1e-6
+
+# Training parameters
+max_epochs: 10
+precision: 32
+accumulate_grad_batches: 1
+gradient_clip_val: 1.0
+
+# Validation
+val_check_interval: 1.0
+check_val_every_n_epoch: 1
+num_sanity_val_steps: 2
+
+# Hardware settings
+accelerator: "auto"  # "cpu", "gpu", "tpu", "auto"
+devices: "auto"      # number of devices or "auto"
+strategy: "auto"     # "ddp", "ddp2", "horovod", etc.
+
+# Logging
+log_every_n_steps: 50
+enable_progress_bar: true
+enable_model_summary: true
+
+# Profiling (for debugging)
+profiler: null  # "simple", "advanced", "pytorch"
+
+# Fast dev run (for debugging)
+fast_dev_run: false
+overfit_batches: 0.0
+
+# Deterministic training
+deterministic: false

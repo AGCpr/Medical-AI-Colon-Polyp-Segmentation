@@ -1,0 +1,66 @@
+# WandB Hyperparameter Sweep Configuration
+# Medical AI Colon Polyp Segmentation
+
+program: train.py
+method: bayes
+
+metric:
+  goal: maximize
+  name: val_dice
+
+parameters:
+  # Model parameters
+  model.backbone:
+    values: ["efficientnet-b4", "efficientnet-b3", "efficientnet-b5", "resnet50"]
+  
+  model.decoder_channels:
+    values: 
+      - [256, 128, 64, 32, 16]
+      - [512, 256, 128, 64, 32]
+      - [128, 64, 32, 16, 8]
+  
+  # Optimizer parameters
+  training.optimizer.lr:
+    distribution: log_uniform_values
+    min: 0.0001
+    max: 0.01
+  
+  training.optimizer.weight_decay:
+    values: [0.0, 0.0001, 0.001, 0.01]
+  
+  training.optimizer.momentum:
+    distribution: uniform
+    min: 0.8
+    max: 0.99
+  
+  # Data augmentation parameters
+  data.batch_size:
+    values: [2, 4, 8]
+  
+  # Training parameters
+  training.max_epochs:
+    values: [10, 15, 20]
+  
+  training.precision:
+    values: [16, 32]
+  
+  # Scheduler parameters
+  training.scheduler.factor:
+    values: [0.1, 0.3, 0.5, 0.7]
+  
+  training.scheduler.patience:
+    values: [3, 5, 7, 10]
+
+# Early termination
+early_terminate:
+  type: hyperband
+  min_iter: 3
+  eta: 3
+
+# Run configuration
+run_cap: 50
+count: 30
+
+# Project settings
+project: colon-polyp-segmentation-sweep
+entity: null  # Set to your WandB entity name

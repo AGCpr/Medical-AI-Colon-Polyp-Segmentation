@@ -1,0 +1,42 @@
+# PyTorch Lightning callbacks configuration
+
+# Model checkpoint callback
+model_checkpoint:
+  _target_: pytorch_lightning.callbacks.ModelCheckpoint
+  dirpath: null  # will use trainer default
+  filename: "best_model"
+  monitor: "val_dice"
+  mode: "max"
+  save_top_k: 1
+  save_last: true
+  verbose: true
+  auto_insert_metric_name: false
+
+# Early stopping callback
+early_stopping:
+  _target_: pytorch_lightning.callbacks.EarlyStopping
+  monitor: "val_dice"
+  mode: "max"
+  patience: 10
+  min_delta: 0.001
+  verbose: true
+  strict: true
+  check_finite: true
+  stopping_threshold: null
+  divergence_threshold: null
+
+# Learning rate monitor
+lr_monitor:
+  _target_: pytorch_lightning.callbacks.LearningRateMonitor
+  logging_interval: "epoch"
+  log_momentum: false
+
+# Rich progress bar (optional)
+progress_bar:
+  _target_: pytorch_lightning.callbacks.RichProgressBar
+  leave: true
+
+# Device stats monitor (optional)
+device_stats:
+  _target_: pytorch_lightning.callbacks.DeviceStatsMonitor
+  cpu_stats: true

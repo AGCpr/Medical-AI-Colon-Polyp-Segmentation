@@ -1,0 +1,36 @@
+# Hydra-MONAI-Lightning-FlexibleUNet-ColonPolypSegmentation
+# Main configuration file
+
+defaults:
+  - data: data
+  - model: unet
+  - training: training
+  - callbacks: callbacks
+  - transforms: transforms
+  - _self_
+
+# Hydra settings
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra:job.num}
+
+# General settings
+project_name: "colon-polyp-segmentation"
+experiment_name: "flexibleunet-efficientnet-b4"
+seed: 42
+debug: false
+
+# Paths
+data_dir: "Kvasir-SEG"
+output_dir: "outputs"
+log_dir: "lightning_logs"
+
+# WandB settings (optional)
+wandb:
+  enabled: false
+  project: ${project_name}
+  name: ${experiment_name}
+  tags: ["segmentation", "polyp", "medical-ai", "monai"]
