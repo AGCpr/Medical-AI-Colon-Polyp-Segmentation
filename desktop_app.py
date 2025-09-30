@@ -29,6 +29,7 @@ class DesktopApp:
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = None
+        self.model_input_size = (320, 320)
         self.ckpt_path = tk.StringVar(value=default_ckpt_path())
         self.image_path = tk.StringVar(value="")
         self.threshold = tk.DoubleVar(value=0.5)
@@ -99,12 +100,21 @@ class DesktopApp:
             self.model = SegmentationModel.load_from_checkpoint(ckpt)
             self.model.eval()
             self.model.to(self.device)
-            self.status_var.set(f"Model loaded: {os.path.basename(ckpt)} on {self.device}")
+
+            # Extract input size from model hparams
+            if hasattr(self.model, "hparams") and "spatial_size" in self.model.hparams:
+                self.model_input_size = tuple(self.model.hparams["spatial_size"])
+            else:
+                # Fallback to default if not found
+                self.model_input_size = (320, 320)
+                messagebox.showwarning("Warning", "Could not determine model input size from checkpoint. Falling back to default (320, 320).")
+
+            self.status_var.set(f"Model loaded: {os.path.basename(ckpt)} on {self.device} | Input size: {self.model_input_size}")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to load model: {e}")
 
-    @staticmethod
-    def _preprocess(img: Image.Image, size=(320, 320)) -> torch.Tensor:
+    def _preprocess(self, img: Image.Image) -> torch.Tensor:
+        size = self.model_input_size
         img_resized = img.convert("RGB").resize(size)
         arr = np.array(img_resized).astype(np.float32) / 255.0
         arr = np.transpose(arr, (2, 0, 1))  # CHW
