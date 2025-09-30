@@ -120,36 +120,19 @@ class SegmentationModel(pl.LightningModule):
         )
 
     def configure_optimizers(self):
-        # Instantiate optimizer with model parameters
-        optimizer_cfg = self.optimizer_cfg.copy()
-        optimizer_class = optimizer_cfg.pop("_target_")
-
-        if optimizer_class in ["torch.optim.Adam", "torch.optim.AdamW"]:
-            optimizer_cfg.pop("momentum", None)
-
-        # Get the optimizer class
-        if optimizer_class == "torch.optim.Adam":
-            optimizer = torch.optim.Adam(self.parameters(), **optimizer_cfg)
-        elif optimizer_class == "torch.optim.SGD":
-            optimizer = torch.optim.SGD(self.parameters(), **optimizer_cfg)
-        elif optimizer_class == "torch.optim.AdamW":
-            optimizer = torch.optim.AdamW(self.parameters(), **optimizer_cfg)
-        else:
-            # Use instantiate for other optimizers
-            optimizer = instantiate(
-                {"_target_": optimizer_class, **optimizer_cfg}, params=self.parameters()
-            )
+        # Instantiate optimizer with model parameters using Hydra
+        optimizer = instantiate(self.optimizer_cfg, params=self.parameters())
 
         # Configure scheduler if provided
-        if self.scheduler_cfg:
-            scheduler = instantiate(self.scheduler_cfg, optimizer=optimizer)
-            return {
-                "optimizer": optimizer,
-                "lr_scheduler": {
-                    "scheduler": scheduler,
-                    "monitor": "val_dice",
-                    "frequency": 1,
-                },
-            }
+        if not self.scheduler_cfg:
+            return optimizer
 
-        return optimizer
+        scheduler = instantiate(self.scheduler_cfg, optimizer=optimizer)
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                "scheduler": scheduler,
+                "monitor": "val_dice",
+                "frequency": 1,
+            },
+        }
