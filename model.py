@@ -1,10 +1,13 @@
 import torch
 import pytorch_lightning as pl
+import logging
 from monai.metrics import DiceMetric
 from monai.losses import DiceLoss
 from monai.networks.nets import FlexibleUNet
 from hydra.utils import instantiate
 from omegaconf import DictConfig
+
+logger = logging.getLogger(__name__)
 
 
 class SegmentationModel(pl.LightningModule):
@@ -63,11 +66,11 @@ class SegmentationModel(pl.LightningModule):
         loss = self.loss_fn(y_res, y)
 
         preds = (torch.sigmoid(y_res) > 0.5).float()
-        y = y.float()  # Ensuring label is float tensor(fix for an error)
+        y = y.float()
 
-        # debugging
         if preds.shape != y.shape:
-            print(f"Mismatch: preds {preds.shape}, labels {y.shape}")
+            logger.warning(f"Shape mismatch in training: preds {preds.shape}, labels {y.shape}")
+            preds = torch.nn.functional.interpolate(preds, size=y.shape[-2:], mode='nearest')
 
         self.train_dice(preds, y)
 
@@ -83,6 +86,11 @@ class SegmentationModel(pl.LightningModule):
         y_res = self(x)
         loss = self.loss_fn(y_res, y)
         preds = (torch.sigmoid(y_res) > 0.5).float()
+
+        if preds.shape != y.shape:
+            logger.warning(f"Shape mismatch in validation: preds {preds.shape}, labels {y.shape}")
+            preds = torch.nn.functional.interpolate(preds, size=y.shape[-2:], mode='nearest')
+
         self.val_dice(preds, y)
         self.log("val_loss", loss, prog_bar=True, on_step=False, on_epoch=True)
         return loss
@@ -96,6 +104,10 @@ class SegmentationModel(pl.LightningModule):
         y_res = self(x)
         loss = self.loss_fn(y_res, y)
         preds = (torch.sigmoid(y_res) > 0.5).float()
+
+        if preds.shape != y.shape:
+            logger.warning(f"Shape mismatch in test: preds {preds.shape}, labels {y.shape}")
+            preds = torch.nn.functional.interpolate(preds, size=y.shape[-2:], mode='nearest')
 
         self.test_dice(preds, y)
 

@@ -1,0 +1,25 @@
+# Data configuration for Kvasir-SEG Polyp Segmentation Dataset
+
+# Dataset paths
+image_dir: "Kvasir-SEG/images"
+mask_dir: "Kvasir-SEG/masks"
+png_image_dir: "Kvasir-SEG/images"
+png_mask_dir: "Kvasir-SEG/masks"
+
+# File extensions
+image_extensions: [".jpg", ".jpeg", ".png"]
+mask_extensions: [".jpg", ".jpeg", ".png"]
+
+# Image preprocessing
+image_size: [320, 320]
+
+# Data splits (should sum to 1.0)
+train_split: 0.7
+val_split: 0.15
+test_split: 0.15
+
+# DataLoader settings
+batch_size: 8
+num_workers: 4
+pin_memory: true
+persistent_workers: true

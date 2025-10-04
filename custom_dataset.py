@@ -3,9 +3,12 @@ Custom MONAI-compatible dataset class for polyp segmentation
 """
 
 import os
+import logging
 from typing import Dict, List, Optional, Callable, Any
 from torch.utils.data import Dataset
 from monai.data import Dataset as MonaiDataset
+
+logger = logging.getLogger(__name__)
 
 
 class SegmentationDataset(Dataset):
@@ -46,17 +49,17 @@ class SegmentationDataset(Dataset):
                 continue
                 
             if not os.path.exists(image_path):
-                print(f"Warning: Image file not found: {image_path}")
+                logger.warning(f"Image file not found: {image_path}")
                 continue
-                
+
             if not os.path.exists(label_path):
-                print(f"Warning: Label file not found: {label_path}")
+                logger.warning(f"Label file not found: {label_path}")
                 continue
                 
             valid_pairs.append(pair)
         
         self.file_pairs = valid_pairs
-        print(f"Dataset initialized with {len(self.file_pairs)} valid file pairs")
+        logger.info(f"Dataset initialized with {len(self.file_pairs)} valid file pairs")
     
     def __len__(self) -> int:
         """Return dataset size"""
@@ -89,7 +92,7 @@ class SegmentationDataset(Dataset):
             try:
                 data = self.transforms(data)
             except Exception as e:
-                print(f"Error applying transforms to {file_pair['image']}: {e}")
+                logger.error(f"Error applying transforms to {file_pair['image']}: {e}")
                 raise e
         
         return data
@@ -151,8 +154,8 @@ class MonaiSegmentationDataset(MonaiDataset):
                 os.path.exists(pair['image']) and 
                 os.path.exists(pair['label'])):
                 valid_pairs.append(pair)
-        
-        print(f"MONAI dataset initialized with {len(valid_pairs)} valid file pairs")
+
+        logger.info(f"MONAI dataset initialized with {len(valid_pairs)} valid file pairs")
         
         super().__init__(
             data=valid_pairs,

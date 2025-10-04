@@ -3,6 +3,7 @@ PyTorch Lightning DataModule for Kvasir-SEG Polyp Segmentation Dataset
 """
 
 import os
+import logging
 import pytorch_lightning as pl
 from typing import Optional, List, Dict, Tuple
 from sklearn.model_selection import train_test_split
@@ -13,6 +14,8 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 
 from custom_dataset import SegmentationDataset
+
+logger = logging.getLogger(__name__)
 
 
 class SegmentationDataModule(pl.LightningDataModule):
@@ -68,8 +71,8 @@ class SegmentationDataModule(pl.LightningDataModule):
                 f"Neither {self.image_dir} nor {self.png_image_dir} exists. "
                 "Please download the Kvasir-SEG dataset."
             )
-        
-        print(f"Data directories found.")
+
+        logger.info("Data directories found.")
     
     def setup(self, stage: Optional[str] = None) -> None:
         """
@@ -80,11 +83,11 @@ class SegmentationDataModule(pl.LightningDataModule):
         if os.path.exists(self.png_image_dir) and os.path.exists(self.png_mask_dir):
             image_dir = self.png_image_dir
             mask_dir = self.png_mask_dir
-            print("Using PNG format dataset")
+            logger.info("Using PNG format dataset")
         else:
             image_dir = self.image_dir
             mask_dir = self.mask_dir
-            print("Using original format dataset")
+            logger.info("Using original format dataset")
         
         # Get file list
         image_files = self._get_file_list(image_dir, self.data_cfg.image_extensions)
@@ -92,8 +95,8 @@ class SegmentationDataModule(pl.LightningDataModule):
         
         # Match image and mask files
         file_pairs = self._match_files(image_files, mask_files, image_dir, mask_dir)
-        
-        print(f"Found {len(file_pairs)} image-mask pairs")
+
+        logger.info(f"Found {len(file_pairs)} image-mask pairs")
         
         # Split data
         if len(file_pairs) == 0:
@@ -115,8 +118,8 @@ class SegmentationDataModule(pl.LightningDataModule):
             random_state=self.cfg.seed if hasattr(self.cfg, 'seed') else 42,
             shuffle=True
         )
-        
-        print(f"Train: {len(train_files)}, Val: {len(val_files)}, Test: {len(test_files)}")
+
+        logger.info(f"Data split - Train: {len(train_files)}, Val: {len(val_files)}, Test: {len(test_files)}")
         
         # Setup transforms
         self._setup_transforms()
